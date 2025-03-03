@@ -2,6 +2,8 @@ import copy
 import math
 import pygame
 from generalOptions import *
+from concurrent.futures import ThreadPoolExecutor
+
 
 
 class Ray():
@@ -108,7 +110,7 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
     flag_v = False
     vertical_dots = ()
     xi = 1
-    while xi < 8 and not (flag_v):
+    while xi < 5 and not (flag_v):
         if angel > -90 and angel < 90:
             x_current = for_x_t + (xi * 50) - 50
             y_current = math.tan(math.radians(angel)) * (x_current - st_x) + st_y
@@ -145,7 +147,7 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
     flag_h = False
     horizontal_dots = ()
     yi = 1
-    while yi < 8 and not (flag_h):
+    while yi < 5 and not (flag_h):
         if angel > -180 and angel < 0:
             y_current = for_y_t - (yi * 50) - 0
             x_current = (y_current - st_y) / math.tan(math.radians(angel)) + st_x
@@ -195,11 +197,6 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
     # except:
     #     pass
 
-
-
-
-
-
     try:
         image = pygame.Surface((5, 5))
         image.fill((255, 10, 10))
@@ -221,9 +218,9 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
             v_or_h = 'h'
 
         rect.center = (all_light_dots[0], all_light_dots[1])
-        pygame.draw.line(screen, (228, 215, 141), (st_x, st_y), all_light_dots, 1)
+        # pygame.draw.line(screen, (228, 215, 141), (st_x, st_y), all_light_dots, 1)
         screen.blit(image, rect)
-        if power <= 400:
+        if power <= 250:
             if v_or_h == 'v':
                 ray_casting(screen, (180 - angel), visible_obj, power, vertical_dots[0], vertical_dots[1],
                             (x_t) % 50, ((y_t)) % 50)
@@ -237,11 +234,11 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
             rect.center = (all_light_dots[0], all_light_dots[1])
             screen.blit(image, rect)
 
-            pygame.draw.line(screen, (228, 215, 141), (st_x, st_y), all_light_dots, 1)
+            # pygame.draw.line(screen, (228, 215, 141), (st_x, st_y), all_light_dots, 1)
 
             power += (math.sqrt(((vertical_dots[0] - (st_x)) ** 2) + ((vertical_dots[1] - (
                 st_y)) ** 2)))
-            if power <= 400:
+            if power <= 250:
                 ray_casting(screen, (180 - angel), visible_obj, power, vertical_dots[0], vertical_dots[1],
                             (x_t), (y_t))
 
@@ -250,11 +247,11 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
             rect.center = (all_light_dots[0], all_light_dots[1])
             screen.blit(image, rect)
 
-            pygame.draw.line(screen, (228, 215, 141), (st_x, st_y), all_light_dots, 1)
+            # pygame.draw.line(screen, (228, 215, 141), (st_x, st_y), all_light_dots, 1)
 
             power += (math.sqrt(((horizontal_dots[0] - (st_x)) ** 2) + ((horizontal_dots[1] - (
                 st_y)) ** 2)))
-            if power <= 400:
+            if power <= 250:
                 ray_casting(screen, (-angel), visible_obj, power, horizontal_dots[0], horizontal_dots[1],
                             (x_t), (y_t))
 
@@ -263,12 +260,12 @@ def network(scren, x_t, y_t, angel, visible_obj, power):
     all_light_dots = []
     x_t = x_t % 50
     y_t = y_t % 50
-    while x_t < 1200:
-        pygame.draw.line(scren, (255, 0, 255, 100), (x_t, 0), (x_t, 720), 1)
-        x_t += 50
-    while y_t < 1200:
-        pygame.draw.line(scren, (255, 0, 255, 100), (0, y_t), (1200, y_t), 1)
-        y_t += 50
+    # while x_t < 1200:
+    #     pygame.draw.line(scren, (255, 0, 255, 100), (x_t, 0), (x_t, 720), 1)
+    #     x_t += 50
+    # while y_t < 1200:
+    #     pygame.draw.line(scren, (255, 0, 255, 100), (0, y_t), (1200, y_t), 1)
+    #     y_t += 50
 
     flag_v = False
     vertical_dots = []
@@ -349,7 +346,7 @@ def network(scren, x_t, y_t, angel, visible_obj, power):
             v_or_h = 'h'
         rect.center = (all_light_dots[0][0], all_light_dots[0][1])
         # scren.blit(image, rect)
-        pygame.draw.line(scren, (238, 222, 121), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]), 1)
+        # pygame.draw.line(scren, (238, 222, 121), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]), 1)
         if power <= 400:
             if v_or_h == 'v':
                 ray_casting(scren, (180 - angel), visible_obj, power, vertical_dots[0][0], vertical_dots[0][1],
@@ -364,8 +361,7 @@ def network(scren, x_t, y_t, angel, visible_obj, power):
             rect.center = (all_light_dots[0][0], all_light_dots[0][1])
             scren.blit(image, rect)
 
-            pygame.draw.line(scren, (228, 215, 141), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]),
-                             1)
+            # pygame.draw.line(scren, (228, 215, 141), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]),1)
 
             power += (math.sqrt(((vertical_dots[0][0] - (SCREEN_WIDTH // 2)) ** 2) + ((vertical_dots[0][1] - (
                     SCREEN_HEIGHT // 2)) ** 2)))
@@ -377,8 +373,7 @@ def network(scren, x_t, y_t, angel, visible_obj, power):
             rect.center = (all_light_dots[0][0], all_light_dots[0][1])
             scren.blit(image, rect)
 
-            pygame.draw.line(scren, (228, 215, 141), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]),
-                             1)
+            # pygame.draw.line(scren, (228, 215, 141), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]), 1)
 
             power += (math.sqrt(((horizontal_dots[0][0] - (SCREEN_WIDTH // 2)) ** 2) + (
                     (horizontal_dots[0][1] - (SCREEN_HEIGHT // 2)) ** 2)))

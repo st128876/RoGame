@@ -4,6 +4,7 @@ from shapely.geometry import Polygon
 
 import pygame
 import random
+from concurrent.futures import ThreadPoolExecutor
 
 import generalOptions
 
@@ -198,7 +199,7 @@ def main():
                     may_be_visible.add(obj)
 
         for obj in may_be_visible:
-            obj.draw(screen)
+            # obj.draw(screen)
             obj.collision(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, player, screen)
 
         for obj in all_objects_on_map_now:  # Обновляем объекты в мире
@@ -267,14 +268,20 @@ def main():
 
         # Вычисляем угол поворота
         angel = math.degrees(math.atan2(mouse_y - (SCREEN_HEIGHT // 2), mouse_x - (SCREEN_WIDTH // 2)))
-        for r in range(-6, 6):
-            # print(angel)
-            # ray = Ray(angel + (r * 0.3), 300)
-            # ray.draw(screen)
-            try:
-                network(screen, may_be_visible.sprites()[0].give_centre()[0], may_be_visible.sprites()[0].give_centre()[1], angel + (r * 2), may_be_visible, 0)
-            except:
-                pass
+        # for r in range(-6, 6):
+        #     try:
+        #         network(screen, may_be_visible.sprites()[0].give_centre()[0], may_be_visible.sprites()[0].give_centre()[1], angel + (r * 2), may_be_visible, 0)
+        #     except:
+        #         pass
+
+        with ThreadPoolExecutor() as executor:
+            futures = [executor.submit(network, screen,
+                                       may_be_visible.sprites()[0].give_centre()[0],
+                                       may_be_visible.sprites()[0].give_centre()[1],
+                                       angel + (r * 2),
+                                       may_be_visible,
+                                       0)
+                       for r in range(-12, 12)]
 
 
         # Обновление экрана
@@ -286,7 +293,7 @@ def main():
         ticks += 1
 
         # Ограничение кадров в секунду
-        clock.tick(60)  # 60 кадров в секунду
+        clock.tick(30)  # 60 кадров в секунду
 
         # print(bullets_death)
     pygame.quit()  # Завершаем работу Pygame
