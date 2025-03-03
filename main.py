@@ -267,7 +267,7 @@ def main():
 
         # Вычисляем угол поворота
         angel = math.degrees(math.atan2(mouse_y - (SCREEN_HEIGHT // 2), mouse_x - (SCREEN_WIDTH // 2)))
-        for r in range(-12, 12):
+        for r in range(-6, 6):
             # print(angel)
             # ray = Ray(angel + (r * 0.3), 300)
             # ray.draw(screen)

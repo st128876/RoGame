@@ -42,7 +42,6 @@ def collision_light(scren, sprits, dot, v_or_h=''):
                         flag_rect1 = True
                         break
 
-
                 image2 = pygame.Surface((5, 5))
                 image2.fill((150, 150, 150))
                 rect2 = image2.get_rect()
@@ -103,7 +102,7 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
     self_image.fill((0, 255, 0))
     self_rect = self_image.get_rect()  # Получаем прямоугольник для объектов
     self_rect.center = (for_x_t, for_y_t)
-    screen.blit(self_image, self_rect)
+    # screen.blit(self_image, self_rect)
 
     print(angel)
     flag_v = False
@@ -148,7 +147,7 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
     yi = 1
     while yi < 8 and not (flag_h):
         if angel > -180 and angel < 0:
-            y_current = for_y_t - (yi * 50) - 50
+            y_current = for_y_t - (yi * 50) - 0
             x_current = (y_current - st_y) / math.tan(math.radians(angel)) + st_x
 
             flag_h = collision_light(screen, visible_obj, (x_current, y_current), 'h')
@@ -180,19 +179,26 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
             # screen.blit(self_image, self_rect)
         yi += 1
 
-    # image = pygame.Surface((5, 5))
-    # image.fill((255, 10, 10))
-    # rect = image.get_rect()
+    image = pygame.Surface((5, 5))
+    image.fill((255, 10, 10))
+    rect = image.get_rect()
+
     # try:
     #     rect.center = (horizontal_dots[0], horizontal_dots[1])
     #     screen.blit(image, rect)
     # except:
     #     pass
+    #
     # try:
     #     rect.center = (vertical_dots[0], vertical_dots[1])
     #     screen.blit(image, rect)
     # except:
     #     pass
+
+
+
+
+
 
     try:
         image = pygame.Surface((5, 5))
@@ -215,7 +221,7 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
             v_or_h = 'h'
 
         rect.center = (all_light_dots[0], all_light_dots[1])
-        pygame.draw.line(screen, (255, 255, 0), (st_x, st_y), all_light_dots, 1)
+        pygame.draw.line(screen, (228, 215, 141), (st_x, st_y), all_light_dots, 1)
         screen.blit(image, rect)
         if power <= 400:
             if v_or_h == 'v':
@@ -230,7 +236,9 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
             all_light_dots = vertical_dots
             rect.center = (all_light_dots[0], all_light_dots[1])
             screen.blit(image, rect)
-            pygame.draw.line(screen, (255, 255, 0), (st_x, st_y), all_light_dots, 1)
+
+            pygame.draw.line(screen, (228, 215, 141), (st_x, st_y), all_light_dots, 1)
+
             power += (math.sqrt(((vertical_dots[0] - (st_x)) ** 2) + ((vertical_dots[1] - (
                 st_y)) ** 2)))
             if power <= 400:
@@ -241,13 +249,14 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
             all_light_dots = horizontal_dots
             rect.center = (all_light_dots[0], all_light_dots[1])
             screen.blit(image, rect)
-            pygame.draw.line(screen, (255, 255, 0), (st_x, st_y), all_light_dots, 1)
+
+            pygame.draw.line(screen, (228, 215, 141), (st_x, st_y), all_light_dots, 1)
+
             power += (math.sqrt(((horizontal_dots[0] - (st_x)) ** 2) + ((horizontal_dots[1] - (
                 st_y)) ** 2)))
             if power <= 400:
                 ray_casting(screen, (-angel), visible_obj, power, horizontal_dots[0], horizontal_dots[1],
                             (x_t), (y_t))
-
 
 
 def network(scren, x_t, y_t, angel, visible_obj, power):
@@ -320,8 +329,6 @@ def network(scren, x_t, y_t, angel, visible_obj, power):
     # except:
     #     pass
 
-
-
     try:
         image = pygame.Surface((5, 5))
         image.fill((255, 10, 10))
@@ -342,22 +349,24 @@ def network(scren, x_t, y_t, angel, visible_obj, power):
             v_or_h = 'h'
         rect.center = (all_light_dots[0][0], all_light_dots[0][1])
         # scren.blit(image, rect)
-        pygame.draw.line(scren, (255, 255, 0), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]), 1)
+        pygame.draw.line(scren, (238, 222, 121), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]), 1)
         if power <= 400:
             if v_or_h == 'v':
                 ray_casting(scren, (180 - angel), visible_obj, power, vertical_dots[0][0], vertical_dots[0][1],
                             (x_t) % 50, ((y_t - 8)) % 50)
             else:
                 ray_casting(scren, (-angel), visible_obj, power, horizontal_dots[0][0], horizontal_dots[0][1],
-                            (x_t) % 50, ((y_t - 8)) % 50)\
-
+                            (x_t) % 50, ((y_t - 8)) % 50)
 
     except:
         if horizontal_dots == [] and vertical_dots != []:
             all_light_dots.append(vertical_dots[0])
             rect.center = (all_light_dots[0][0], all_light_dots[0][1])
             scren.blit(image, rect)
-            pygame.draw.line(scren, (255, 255, 0), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]), 1)
+
+            pygame.draw.line(scren, (228, 215, 141), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]),
+                             1)
+
             power += (math.sqrt(((vertical_dots[0][0] - (SCREEN_WIDTH // 2)) ** 2) + ((vertical_dots[0][1] - (
                     SCREEN_HEIGHT // 2)) ** 2)))
             if power <= 400:
@@ -367,7 +376,10 @@ def network(scren, x_t, y_t, angel, visible_obj, power):
             all_light_dots.append(horizontal_dots[0])
             rect.center = (all_light_dots[0][0], all_light_dots[0][1])
             scren.blit(image, rect)
-            pygame.draw.line(scren, (255, 255, 0), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]), 1)
+
+            pygame.draw.line(scren, (228, 215, 141), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]),
+                             1)
+
             power += (math.sqrt(((horizontal_dots[0][0] - (SCREEN_WIDTH // 2)) ** 2) + (
                     (horizontal_dots[0][1] - (SCREEN_HEIGHT // 2)) ** 2)))
             if power <= 400:
