@@ -27,7 +27,6 @@ class Enemy(pygame.sprite.Sprite):
         self.dx = player_x / distance * speed
         self.dy = player_y / distance * speed
 
-
     def damage_to_yourself(self, hit_x, hit_y, radius_hit=12):
         if ((hit_x - self.rect.x) ** 2) + ((hit_y - self.rect.y) ** 2) <= (radius_hit ** 2):
             self.health -= 50
@@ -38,3 +37,11 @@ class Enemy(pygame.sprite.Sprite):
     def draw(self, screen):
         # Рисуем объект на экране
         screen.blit(self.image, self.rect)
+
+    def visor_line(self, screen):
+        for self.angel_visor in range(0, 360, 10):
+
+            self.end_pos_for_tic_x = self.rect.center[0] + (170) * math.cos(math.radians(self.angel_visor))
+            self.end_pos_for_tic_y = self.rect.center[1] + (170) * math.sin(math.radians(self.angel_visor))
+
+            pygame.draw.line(screen, (255, 255, 0), self.rect.center, (self.end_pos_for_tic_x, self.end_pos_for_tic_y))

@@ -37,7 +37,7 @@ class Walls(pygame.sprite.Sprite):
             self.rect_r.center = (self.rect.x + 47, self.rect.y + 27)  # Размещаем объект
             if self.rect_r.colliderect(creature_rect):
                 self.image_r.fill((255, 0, 0))
-                screen.blit(self.image_r, self.rect_r)
+                # screen.blit(self.image_r, self.rect_r)
 
                 generalOptions.x_to_left = 0
 
@@ -46,7 +46,7 @@ class Walls(pygame.sprite.Sprite):
             self.rect_l.center = (self.rect.x, self.rect.y + 27)  # Размещаем объект
             if self.rect_l.colliderect(creature_rect):
                 self.image_l.fill((255, 0, 0))
-                screen.blit(self.image_l, self.rect_l)
+                # screen.blit(self.image_l, self.rect_l)
 
                 generalOptions.x_to_right = 0
 
@@ -55,7 +55,7 @@ class Walls(pygame.sprite.Sprite):
             self.rect_u.center = (self.rect.x + 27, self.rect.y)  # Размещаем объект
             if self.rect_u.colliderect(creature_rect):
                 self.image_u.fill((255, 0, 0))
-                screen.blit(self.image_u, self.rect_u)
+                # screen.blit(self.image_u, self.rect_u)
 
                 generalOptions.y_to_down = 0
 
@@ -64,7 +64,7 @@ class Walls(pygame.sprite.Sprite):
             self.rect_d.center = (self.rect.x + 27, self.rect.y + 50)  # Размещаем объект
             if self.rect_d.colliderect(creature_rect):
                 self.image_d.fill((255, 0, 0))
-                screen.blit(self.image_d, self.rect_d)
+                # screen.blit(self.image_d, self.rect_d)
 
                 generalOptions.y_to_up = 0
 

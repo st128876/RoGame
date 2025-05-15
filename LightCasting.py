@@ -7,111 +7,8 @@ from generalOptions import *
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 import ray
 
-yellow = (225, 204, 79, 100)
 
-
-def collision_light(screen, sprits, dot, v_or_h=''):
-    image = pygame.Surface((5, 5))
-    image.fill((0, 0, 255))
-    rect = image.get_rect()
-    rect.center = (dot[0], dot[1] - 3)
-
-    # screen.blit(image, rect)
-
-    image_left_top = pygame.Surface((5, 5))
-    image_left_top.fill((0, 0, 255))
-    rect_left_top = image_left_top.get_rect()
-    rect_left_top.center = (dot[0] - 25, dot[1] - 25)
-
-    image_left_bottom = pygame.Surface((5, 5))
-    image_left_bottom.fill((0, 0, 255))
-    rect_left_bottom = image_left_bottom.get_rect()
-    rect_left_bottom.center = (dot[0] - 25, dot[1] + 25)
-
-    image_right_top = pygame.Surface((5, 5))
-    image_right_top.fill((0, 0, 255))
-    rect_right_top = image_right_top.get_rect()
-    rect_right_top.center = (dot[0] + 25, dot[1] - 25)
-
-    image_right_bottom = pygame.Surface((5, 5))
-    image_right_bottom.fill((0, 0, 255))
-    rect_right_bottom = image_right_bottom.get_rect()
-    rect_right_bottom.center = (dot[0] + 25, dot[1] + 25)
-
-
-    # screen.blit(image_right_bottom, rect_right_bottom)
-    # screen.blit(image_left_bottom, rect_left_bottom)
-    # screen.blit(image_right_top, rect_right_top)
-    # screen.blit(image_left_top, rect_left_top)
-
-    flag = False
-    for obj in sprits:
-        if rect.colliderect(obj.give_rect()):
-            flag = True
-    if not flag:
-        return False
-    if v_or_h == 'v':
-        if dot[0] < (generalOptions.SCREEN_WIDTH // 2):
-            if dot[1] >= (generalOptions.SCREEN_HEIGHT // 2):
-
-                for obj in sprits:
-                    if rect_right_bottom.colliderect(obj.give_rect()):
-                        return False
-
-            if dot[1] < (generalOptions.SCREEN_HEIGHT // 2):
-
-                for obj in sprits:
-                    if rect_right_top.colliderect(obj.give_rect()):
-                        return False
-
-
-        elif dot[0] >= (generalOptions.SCREEN_WIDTH // 2):
-            if dot[1] >= (generalOptions.SCREEN_HEIGHT // 2):
-
-                for obj in sprits:
-                    if rect_left_bottom.colliderect(obj.give_rect()):
-                        return False
-
-            elif dot[1] < (generalOptions.SCREEN_HEIGHT // 2):
-
-                for obj in sprits:
-                    if rect_left_top.colliderect(obj.give_rect()):
-                        return False
-
-    else:
-        screen.blit(image, rect)
-        if dot[0] < (generalOptions.SCREEN_WIDTH // 2):
-            if dot[1] >= (generalOptions.SCREEN_HEIGHT // 2):
-
-                for obj in sprits:
-                    if rect_left_top.colliderect(obj.give_rect()):
-                        return False
-
-            elif dot[1] < (generalOptions.SCREEN_HEIGHT // 2):
-
-                for obj in sprits:
-                    if rect_left_bottom.colliderect(obj.give_rect()):
-                        return False
-
-
-        elif dot[0] >= (generalOptions.SCREEN_WIDTH // 2):
-            if dot[1] >= (generalOptions.SCREEN_HEIGHT // 2):
-
-                for obj in sprits:
-                    if rect_right_top.colliderect(obj.give_rect()):
-                        return False
-
-            elif dot[1] < (generalOptions.SCREEN_HEIGHT // 2):
-                print('da')
-                screen.blit(image_right_bottom, rect_right_bottom)
-                for obj in sprits:
-                    if rect_right_bottom.colliderect(obj.give_rect()):
-                        # screen.blit(image, rect)
-                        return False
-    return True
-
-
-def collision_light_general(scren, sprits, dot, v_or_h=''):
+def collision_light(scren, sprits, dot, v_or_h=''):
     image = pygame.Surface((5, 5))
     image.fill((255, 0, 0))
     rect = image.get_rect()
@@ -177,7 +74,7 @@ def collision_light_general(scren, sprits, dot, v_or_h=''):
     return False
 
 
-def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
+def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t, light_sp):
     if angel > 180:
         angel = angel - 360
     if angel < -180:
@@ -200,10 +97,9 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
             x_current = for_x_t + (xi * 50) - 50
             y_current = math.tan(math.radians(angel)) * (x_current - st_x) + st_y
 
-            flag_v = collision_light_general(screen, visible_obj, (x_current, y_current), 'v')
-            if abs(x_current - st_x) > 4:
-                if flag_v:
-                    vertical_dots = (x_current, y_current)
+            flag_v = collision_light(screen, visible_obj, (x_current, y_current), 'v')
+            if flag_v and abs(x_current - st_x) > 4:
+                vertical_dots = (x_current, y_current)
             else:
                 flag_v = False
 
@@ -217,10 +113,9 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
             x_current = for_x_t - (xi * 50)
             y_current = math.tan(math.radians(angel)) * (x_current - st_x) + st_y
 
-            flag_v = collision_light_general(screen, visible_obj, (x_current, y_current), 'v')
-            if abs(x_current - st_x) > 4:
-                if flag_v:
-                    vertical_dots = (x_current, y_current)
+            flag_v = collision_light(screen, visible_obj, (x_current, y_current), 'v')
+            if flag_v and abs(x_current - st_x) > 4:
+                vertical_dots = (x_current, y_current)
             else:
                 flag_v = False
 
@@ -239,12 +134,9 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
             y_current = for_y_t - (yi * 50) - 0
             x_current = (y_current - st_y) / math.tan(math.radians(angel)) + st_x
 
-            flag_h = collision_light_general(screen, visible_obj, (x_current, y_current), 'h')
-            # collision_light_general(screen, visible_obj, (x_current, y_current), 'h')
-            if abs(y_current - st_y) > 4:
-
-                if flag_h:
-                    horizontal_dots = (x_current, y_current)
+            flag_h = collision_light(screen, visible_obj, (x_current, y_current), 'h')
+            if flag_h and abs(y_current - st_y) > 4:
+                horizontal_dots = (x_current, y_current)
             else:
                 flag_h = False
 
@@ -258,13 +150,9 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
             y_current = for_y_t + (yi * 50) - 50
             x_current = (y_current - st_y) / (math.tan(math.radians(angel) + 0.0000001)) + st_x
 
-            flag_h = collision_light_general(screen, visible_obj, (x_current, y_current), 'h')
-
-            # collision_light_general(screen, visible_obj, (x_current, y_current), 'v')
-
-            if abs(y_current - st_y) > 4:
-                if flag_h:
-                    horizontal_dots = (x_current, y_current)
+            flag_h = collision_light(screen, visible_obj, (x_current, y_current), 'h')
+            if flag_h and abs(y_current - st_y) > 4:
+                horizontal_dots = (x_current, y_current)
             else:
                 flag_h = False
 
@@ -292,7 +180,7 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
     #     pass
 
     try:
-        image = pygame.Surface((8, 8))
+        image = pygame.Surface((5, 5))
         image.fill((255, 10, 10))
         rect = image.get_rect()
         if (math.sqrt(((vertical_dots[0] - (st_x)) ** 2) + ((vertical_dots[1] - (
@@ -313,9 +201,11 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
 
         rect.center = (all_light_dots[0], all_light_dots[1])
 
-        pygame.draw.line(screen, yellow, (st_x, st_y), all_light_dots, 7)
+        pygame.draw.line(screen, (100, 100, 100), (st_x, st_y), all_light_dots, 7)
 
-        # screen.blit(image, rect)
+        light_sp.append((all_light_dots, v_or_h))
+
+        screen.blit(image, rect)
         if power <= 250:
             if v_or_h == 'v':
                 ray_casting(screen, (180 - angel), visible_obj, power, vertical_dots[0], vertical_dots[1],
@@ -328,12 +218,15 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
         if horizontal_dots == () and vertical_dots != ():
             all_light_dots = vertical_dots
             rect.center = (all_light_dots[0], all_light_dots[1])
-            # screen.blit(image, rect)
+            screen.blit(image, rect)
 
-            pygame.draw.line(screen, yellow, (st_x, st_y), all_light_dots, 7)
+            pygame.draw.line(screen, (100, 100, 100), (st_x, st_y), all_light_dots, 7)
 
             power += (math.sqrt(((vertical_dots[0] - (st_x)) ** 2) + ((vertical_dots[1] - (
                 st_y)) ** 2)))
+
+            light_sp.append((all_light_dots, 'v'))
+
             if power <= 250:
                 ray_casting(screen, (180 - angel), visible_obj, power, vertical_dots[0], vertical_dots[1],
                             (x_t), (y_t))
@@ -341,18 +234,21 @@ def ray_casting(screen, angel, visible_obj, power, st_x, st_y, x_t, y_t):
         if horizontal_dots != () and vertical_dots == ():
             all_light_dots = horizontal_dots
             rect.center = (all_light_dots[0], all_light_dots[1])
-            # screen.blit(image, rect)
+            screen.blit(image, rect)
 
-            pygame.draw.line(screen, yellow, (st_x, st_y), all_light_dots, 7)
+            pygame.draw.line(screen, (100, 100, 100), (st_x, st_y), all_light_dots, 7)
 
             power += (math.sqrt(((horizontal_dots[0] - (st_x)) ** 2) + ((horizontal_dots[1] - (
                 st_y)) ** 2)))
+
+            light_sp.append((all_light_dots, 'h'))
+
             if power <= 250:
                 ray_casting(screen, (-angel), visible_obj, power, horizontal_dots[0], horizontal_dots[1],
                             (x_t), (y_t))
 
 
-def network(scren, x_t, y_t, angel, visible_obj, power):
+def network(scren, x_t, y_t, angel, visible_obj, power, light_sp):
     all_light_dots = []
     x_t = x_t % 50
     y_t = y_t % 50
@@ -372,7 +268,7 @@ def network(scren, x_t, y_t, angel, visible_obj, power):
             x = x_s + (SCREEN_WIDTH // 2)
             y = (math.tan(math.radians(angel)) * x_s) + (SCREEN_HEIGHT // 2)
 
-            flag_v = collision_light_general(scren, visible_obj, (x, y), 'v')
+            flag_v = collision_light(scren, visible_obj, (x, y), 'v')
             if flag_v:
                 vertical_dots.append((x, y))
         else:
@@ -380,7 +276,7 @@ def network(scren, x_t, y_t, angel, visible_obj, power):
             x = x_s + (SCREEN_WIDTH // 2)
             y = (math.tan(math.radians(angel)) * x_s) + (SCREEN_HEIGHT // 2)
 
-            flag_v = collision_light_general(scren, visible_obj, (x, y), 'v')
+            flag_v = collision_light(scren, visible_obj, (x, y), 'v')
             if flag_v:
                 vertical_dots.append((x, y))
         xi += 1
@@ -394,7 +290,7 @@ def network(scren, x_t, y_t, angel, visible_obj, power):
             y = y_s + (SCREEN_HEIGHT // 2)
             x = (y_s / math.tan(math.radians(angel))) + (SCREEN_WIDTH // 2)
 
-            flag_h = collision_light_general(scren, visible_obj, (x, y), 'h')
+            flag_h = collision_light(scren, visible_obj, (x, y), 'h')
             if flag_h:
                 horizontal_dots.append((x, y))
 
@@ -403,7 +299,7 @@ def network(scren, x_t, y_t, angel, visible_obj, power):
             y = y_s + (SCREEN_HEIGHT // 2)
             x = (y_s / math.tan(math.radians(angel))) + (SCREEN_WIDTH // 2)
 
-            flag_h = collision_light_general(scren, visible_obj, (x, y), 'h')
+            flag_h = collision_light(scren, visible_obj, (x, y), 'h')
             if flag_h:
                 horizontal_dots.append((x, y))
         yi += 1
@@ -423,7 +319,7 @@ def network(scren, x_t, y_t, angel, visible_obj, power):
     #     pass
 
     try:
-        image = pygame.Surface((8, 8))
+        image = pygame.Surface((5, 5))
         image.fill((255, 10, 10))
         rect = image.get_rect()
 
@@ -441,40 +337,71 @@ def network(scren, x_t, y_t, angel, visible_obj, power):
                     (horizontal_dots[0][1] - (SCREEN_HEIGHT // 2)) ** 2)))
             v_or_h = 'h'
         rect.center = (all_light_dots[0][0], all_light_dots[0][1])
-        # scren.blit(image, rect)
+        scren.blit(image, rect)
 
-        pygame.draw.line(scren, yellow, (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]), 7)
+        pygame.draw.line(scren, (100, 100, 100), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]), 7)
+
+        light_sp.append((all_light_dots, v_or_h))
 
         if power <= 400:
             if v_or_h == 'v':
                 ray_casting(scren, (180 - angel), visible_obj, power, vertical_dots[0][0], vertical_dots[0][1],
-                            (x_t) % 50, ((y_t - 8)) % 50)
+                            (x_t) % 50, ((y_t - 8)) % 50, light_sp)
+
             else:
                 ray_casting(scren, (-angel), visible_obj, power, horizontal_dots[0][0], horizontal_dots[0][1],
-                            (x_t) % 50, ((y_t - 8)) % 50)
+                            (x_t) % 50, ((y_t - 8)) % 50, light_sp)
+
 
     except:
         if horizontal_dots == [] and vertical_dots != []:
             all_light_dots.append(vertical_dots[0])
             rect.center = (all_light_dots[0][0], all_light_dots[0][1])
-            # scren.blit(image, rect)
+            scren.blit(image, rect)
 
-            pygame.draw.line(scren, yellow, (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]), 7)
+            pygame.draw.line(scren, (100, 100, 100), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]), 7)
 
             power += (math.sqrt(((vertical_dots[0][0] - (SCREEN_WIDTH // 2)) ** 2) + ((vertical_dots[0][1] - (
                     SCREEN_HEIGHT // 2)) ** 2)))
+
+            light_sp.append((all_light_dots, 'v'))
+
             if power <= 400:
                 ray_casting(scren, (180 - angel), visible_obj, power, vertical_dots[0][0], vertical_dots[0][1],
-                            (x_t) % 50, ((y_t - 8)) % 50)
+                            (x_t) % 50, ((y_t - 8)) % 50, light_sp)
+
+
+
+
         elif vertical_dots == [] and horizontal_dots != []:
             all_light_dots.append(horizontal_dots[0])
             rect.center = (all_light_dots[0][0], all_light_dots[0][1])
-            # scren.blit(image, rect)
+            scren.blit(image, rect)
 
-            pygame.draw.line(scren, yellow, (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]), 7)
+            pygame.draw.line(scren, (100, 100, 100), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), (all_light_dots[0]), 7)
 
             power += (math.sqrt(((horizontal_dots[0][0] - (SCREEN_WIDTH // 2)) ** 2) + (
                     (horizontal_dots[0][1] - (SCREEN_HEIGHT // 2)) ** 2)))
+
+            light_sp.append((all_light_dots, 'h'))
+
             if power <= 400:
                 ray_casting(scren, (-angel), visible_obj, power, horizontal_dots[0][0], horizontal_dots[0][1],
-                            (x_t) % 50, ((y_t - 8)) % 50)
+                            (x_t) % 50, ((y_t - 8)) % 50, light_sp)
+
+
+def wall_lighting(screen):
+    try:
+        print(generalOptions.left_light_dots[0][0][0][0])
+
+        if generalOptions.left_light_dots[0][1] == generalOptions.right_light_dots[0][1]:
+            if generalOptions.left_light_dots[0][0][0][1]  ==  generalOptions.right_light_dots[0][0][0][1]:
+                if generalOptions.left_light_dots[0][0][0][0] - generalOptions.right_light_dots[0][0][0][0] < 0:
+                    pygame.draw.line(pygame.draw.line(screen, (250, 250, 100), (generalOptions.left_light_dots[0][0][0]),
+                                                      (generalOptions.right_light_dots[0][0][0]), 10))
+                else:
+                    pygame.draw.line(pygame.draw.line(screen, (250, 250, 100), (generalOptions.right_light_dots[0][0][0]),
+                                                      (generalOptions.left_light_dots[0][0][0]), 10))
+
+    except:
+        pass

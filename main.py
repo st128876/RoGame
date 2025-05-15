@@ -4,14 +4,16 @@ from shapely.geometry import Polygon
 
 import pygame
 import random
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+import ray
 
 import generalOptions
 
 from strike import SwordPush, Bullet
 from enemy import Enemy
 from StateObj import Walls
-from RayCasting import Ray, network
+from RayCasting import network
+from Menu import Button, MainMenu
 
 # Инициализация Pygame
 pygame.init()
@@ -19,13 +21,36 @@ pygame.init()
 # Размеры экрана
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 720
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # Создание окна игры
-pygame.display.set_caption("Мир вокруг игрока")  # Заголовок окна
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+# pygame.display.set_caption("Мир вокруг игрока")
 
 # Цвета
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
+
+
+from MapGenerator import type1  # Импортируем функцию генерации карты
+
+def save_modified_map_to_file():
+    # Получаем сгенерированную карту
+    game_map = type1()
+
+    # Вырезаем угол 4x4 (заменяем на пробелы)
+    for y in range(min(4, len(game_map))):
+        for x in range(min(4, len(game_map[0]))):
+            game_map[y][x] = ' '
+
+    # Сохраняем в файл
+    # print(game_map)
+    with open("Maps/level_zero.txt", "w") as f:
+        for row in game_map:
+            f.write(''.join(row) + '\n')
+
+
+save_modified_map_to_file()
+
+# ray.init()
 
 
 # Скорость движения
@@ -127,8 +152,14 @@ def check_intersection(triangle_points, square_points):
     return triangle.intersects(square)
 
 
+menu = MainMenu(screen)
+
+
 # Основная функция игры
 def main():
+    while generalOptions.menu_flag:
+        menu.run()
+
     clock = pygame.time.Clock()  # Для контроля частоты кадров
 
     # Создаем игрока
@@ -165,6 +196,7 @@ def main():
 
         # Движение игрока (сдвиг мира)
         keys = pygame.key.get_pressed()  # Получаем все нажатые клавиши
+
         if keys[pygame.K_a]:  # Двигаемся влево
             generalOptions.x_to_left = generalOptions.move_speed_player
             generalOptions.x_to_right = 0
@@ -194,13 +226,15 @@ def main():
 
         may_be_visible = pygame.sprite.Group()
         for obj in all_objects_on_map_now:
-            if obj.give_centre()[0] > -100 and obj.give_centre()[0] < 1250:
-                if obj.give_centre()[1] > -100 and obj.give_centre()[1] < 740:
+            if obj.give_centre()[0] > 0 and obj.give_centre()[0] < 1200:
+                if obj.give_centre()[1] > 0 and obj.give_centre()[1] < 720:
                     may_be_visible.add(obj)
+                    obj.draw(screen)
+                    obj.collision(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, player, screen)
 
-        for obj in may_be_visible:
-            # obj.draw(screen)
-            obj.collision(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, player, screen)
+        # for obj in may_be_visible:
+        # obj.draw(screen)
+        # obj.collision(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, player, screen)a
 
         for obj in all_objects_on_map_now:  # Обновляем объекты в мире
             obj.update(generalOptions.x_to_right, generalOptions.x_to_left, generalOptions.y_to_up,
@@ -240,6 +274,7 @@ def main():
             en.update(generalOptions.x_to_right, generalOptions.x_to_left, generalOptions.y_to_up,
                       generalOptions.y_to_down)
             en.draw(screen)
+            # en.visor_line(screen)
 
         player.draw(screen)  # Игрок всегда рисуется в центре экрана
         # strong_light = Light()
@@ -259,30 +294,32 @@ def main():
         #                           obj.give_coordinations_wall()) or light_rect.colliderect(obj.give_rect()):
         #         obj.draw(screen)
 
-
         # dist_to_net = network(screen, may_be_visible.sprites()[0].give_centre()[0], may_be_visible.sprites()[0].give_centre()[1])
-
 
         mouse_x, mouse_y = pygame.mouse.get_pos()
         # print(mouse_x - (SCREEN_WIDTH // 2), mouse_y - (SCREEN_HEIGHT // 2))
 
         # Вычисляем угол поворота
         angel = math.degrees(math.atan2(mouse_y - (SCREEN_HEIGHT // 2), mouse_x - (SCREEN_WIDTH // 2)))
-        # for r in range(-6, 6):
-        #     try:
-        #         network(screen, may_be_visible.sprites()[0].give_centre()[0], may_be_visible.sprites()[0].give_centre()[1], angel + (r * 2), may_be_visible, 0)
-        #     except:
-        #         pass
+        for r in range(-15, 15):
+            try:
+                network(screen, may_be_visible.sprites()[0].give_centre()[0], may_be_visible.sprites()[0].give_centre()[1], angel + (r * 1), may_be_visible, 0)
+            except:
+                pass
 
-        with ThreadPoolExecutor() as executor:
-            futures = [executor.submit(network, screen,
-                                       may_be_visible.sprites()[0].give_centre()[0],
-                                       may_be_visible.sprites()[0].give_centre()[1],
-                                       angel + (r * 2),
-                                       may_be_visible,
-                                       0)
-                       for r in range(-12, 12)]
 
+        # angel = math.degrees(math.atan2(mouse_y - (SCREEN_HEIGHT // 2), mouse_x - (SCREEN_WIDTH // 2)))
+        # try:
+        #     with ProcessPoolExecutor() as executor:
+        #         [executor.submit(network, screen,
+        #                          may_be_visible.sprites()[0].give_centre()[0],
+        #                          may_be_visible.sprites()[0].give_centre()[1],
+        #                          angel + (r * 0.5),
+        #                          may_be_visible,
+        #                          0)
+        #          for r in range(-40, 40)]
+        # except:
+        #     pass
 
         # Обновление экрана
         pygame.display.flip()
@@ -293,24 +330,18 @@ def main():
         ticks += 1
 
         # Ограничение кадров в секунду
-        clock.tick(30)  # 60 кадров в секунду
+        clock.tick(60)  # 60 кадров в секунду
+
+        if keys[pygame.K_ESCAPE]:
+            generalOptions.menu_flag = True
+            while generalOptions.menu_flag:
+                menu.run()
 
         # print(bullets_death)
     pygame.quit()  # Завершаем работу Pygame
+    # ray.shutdown()
 
 
 # Запуск игры
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
-
-

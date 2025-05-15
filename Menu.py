@@ -1,16 +1,7 @@
-import pygame
 import sys
+import pygame
+import generalOptions
 
-# Константы
-SCREEN_WIDTH = 1200
-SCREEN_HEIGHT = 720
-FPS = 60
-
-# Цвета
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GRAY = (100, 100, 100)
-LIGHT_GRAY = (170, 170, 170)
 
 class Button:
     def __init__(self, text, pos, size, font, callback):
@@ -21,10 +12,10 @@ class Button:
         self.hovered = False
 
     def draw(self, surface):
-        color = LIGHT_GRAY if self.hovered else GRAY
+        color = (170, 170, 170) if self.hovered else (50, 50, 50)
         pygame.draw.rect(surface, color, self.rect, border_radius=10)
 
-        text_surf = self.font.render(self.text, True, WHITE)
+        text_surf = self.font.render(self.text, True, (255, 255, 255))
         text_rect = text_surf.get_rect(center=self.rect.center)
         surface.blit(text_surf, text_rect)
 
@@ -45,11 +36,11 @@ class MainMenu:
 
     def create_buttons(self):
         # Теперь кнопки слева: x = 100
-        start_button = Button("Новая игра", (100, 200), (250, 70), self.font, self.start_new_game)
+        # start_button = Button("Новая игра", (100, 200), (250, 70), self.font, self.start_new_game)
         continue_button = Button("Продолжить", (100, 300), (250, 70), self.font, self.continue_game)
         exit_button = Button("Выйти", (100, 400), (250, 70), self.font, self.exit_game)
 
-        self.buttons.extend([start_button, continue_button, exit_button])
+        self.buttons.extend([continue_button, exit_button])
 
     def run(self):
         clock = pygame.time.Clock()
@@ -57,7 +48,7 @@ class MainMenu:
         self.running = True  # Для выхода из меню через кнопку
 
         while self.running:
-            self.screen.fill(BLACK)
+            self.screen.fill((0, 0, 0))
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -71,44 +62,16 @@ class MainMenu:
                 button.draw(self.screen)
 
             pygame.display.flip()
-            clock.tick(FPS)
+            clock.tick(generalOptions.FPS)
 
     def start_new_game(self):
+        generalOptions.menu_flag = False
         self.running = False
 
     def continue_game(self):
-        # TODO: Реализовать продолжение игры
-        pass
+        generalOptions.menu_flag = False
+        self.running = False
 
     def exit_game(self):
         pygame.quit()
         sys.exit()
-
-def main_game_loop(screen):
-    clock = pygame.time.Clock()
-    running = True
-
-    while running:
-        screen.fill((30, 30, 30))
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-        pygame.display.flip()
-        clock.tick(FPS)
-
-def main():
-    pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption('Главное меню')
-
-    menu = MainMenu(screen)
-    menu.run()
-    print('111')
-
-    main_game_loop(screen)
-
-if __name__ == "__main__":
-    main()

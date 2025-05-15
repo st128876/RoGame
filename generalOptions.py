@@ -7,3 +7,10 @@ move_speed_player = 1
 
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 720
+
+FPS = 60
+
+menu_flag = True
+
+right_light_dots = []
+left_light_dots = []
